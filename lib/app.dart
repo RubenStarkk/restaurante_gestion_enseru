@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'screens/public/reservation_step1_screen.dart';
+import 'screens/public/reservation_step2_screen.dart';
+import 'screens/public/reservation_step3_screen.dart';
 
 /// Raíz de la app. Define tema y rutas con nombres.
 /// Cada pantalla real se irá enchufando a su ruta correspondiente a medida
@@ -12,6 +16,13 @@ class EnseruApp extends StatelessWidget {
     return MaterialApp(
       title: 'Restaurante Enseru',
       debugShowCheckedModeBanner: false,
+      locale: const Locale('es', 'ES'),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('es', 'ES')],
       theme: _buildTheme(),
       initialRoute: AppRoutes.home,
       routes: {
@@ -26,21 +37,9 @@ class EnseruApp extends StatelessWidget {
               title: 'Carta Digital',
               file: 'lib/screens/public/menu_screen.dart',
             ),
-        AppRoutes.reservationStep1: (_) => const _Placeholder(
-              who: 'Rubén',
-              title: 'Reserva — Paso 1 (Fecha/Turno/Personas)',
-              file: 'lib/screens/public/reservation_step1_screen.dart',
-            ),
-        AppRoutes.reservationStep2: (_) => const _Placeholder(
-              who: 'Rubén',
-              title: 'Reserva — Paso 2 (Plano Interactivo)',
-              file: 'lib/screens/public/reservation_step2_screen.dart',
-            ),
-        AppRoutes.reservationStep3: (_) => const _Placeholder(
-              who: 'Rubén',
-              title: 'Reserva — Paso 3 (Datos de Contacto)',
-              file: 'lib/screens/public/reservation_step3_screen.dart',
-            ),
+        AppRoutes.reservationStep1: (_) => const ReservationStep1Screen(),
+        AppRoutes.reservationStep2: (_) => const ReservationStep2Screen(),
+        AppRoutes.reservationStep3: (_) => const ReservationStep3Screen(),
 
         // Parte staff
         AppRoutes.staffLogin: (_) => const _Placeholder(

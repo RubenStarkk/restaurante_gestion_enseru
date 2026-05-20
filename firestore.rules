@@ -46,6 +46,16 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // ---------- /reservation_locks ----------
+        // Locks deterministas para evitar dobles reservas: el ID es
+        // mesa_AAAA-MM-DD_turno. El cliente público puede CREAR (si el doc
+        // no existe es porque la mesa está libre para ese turno). Leer y
+        // borrar solo staff.
+        match /reservation_locks/{lockId} {
+          allow read, update, delete: if isStaff();
+          allow create: if true;
+        }
+
     // ---------- /reservations ----------
     // El cliente puede CREAR su reserva (sin estar logueado), pero el doc
     // creado debe tener los campos mínimos y el estado "active". Solo el
