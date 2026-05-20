@@ -1,0 +1,85 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userRole() {
+      // Lee el campo "role" del doc /users/{uid}. Si no existe, devuelve null.
+      return isSignedIn()
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : null;
+    }
+
+    function isStaff() {
+      return userRole() == 'admin' || userRole() == 'waiter';
+    }
+
+    function isAdmin() {
+      return userRole() == 'admin';
+    }
+
+    // ---------- /users ----------
+    // Cada usuario puede leer su propio doc para conocer su rol.
+    // Solo un admin puede crear/modificar usuarios y roles.
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // ---------- /tables ----------
+    // Lectura pública (el cliente ve el plano).
+    // Solo el staff puede modificar el estado de las mesas.
+    match /tables/{tableId} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    // ---------- /menu_items ----------
+    // Carta pública. Solo el admin la edita.
+    match /menu_items/{itemId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ---------- /reservations ----------
+    // El cliente puede CREAR su reserva (sin estar logueado), pero el doc
+    // creado debe tener los campos mínimos y el estado "active". Solo el
+    // staff puede leerlas y modificarlas.
+    match /reservations/{reservationId} {
+      allow read: if isStaff();
+
+      allow create: if
+        request.resource.data.keys().hasAll([
+          'date', 'shift', 'guests', 'tableIds',
+          'customerName', 'customerPhone',
+          'status', 'createdAt'
+        ])
+        && request.resource.data.guests is int
+        && request.resource.data.guests > 0
+        && request.resource.data.tableIds is list
+        && request.resource.data.tableIds.size() > 0
+        && request.resource.data.status == 'active'
+        && request.resource.data.customerName is string
+        && request.resource.data.customerName.size() >= 2
+        && request.resource.data.customerPhone is string
+        && request.resource.data.customerPhone.size() >= 6;
+
+      allow update, delete: if isStaff();
+    }
+
+    // ---------- /orders y sub-colección items ----------
+    // Todo cerrado al staff. Los clientes no acceden aquí.
+    match /orders/{orderId} {
+      allow read, write: if isStaff();
+
+      match /items/{itemId} {
+        allow read, write: if isStaff();
+      }
+    }
+  }
+}

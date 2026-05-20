@@ -1,0 +1,14 @@
+[
+  { "id": "m01", "name": "M1",       "capacity": 2, "x": 0.10, "y": 0.15, "status": "free" },
+  { "id": "m02", "name": "M2",       "capacity": 2, "x": 0.25, "y": 0.15, "status": "free" },
+  { "id": "m03", "name": "M3",       "capacity": 4, "x": 0.45, "y": 0.15, "status": "free" },
+  { "id": "m04", "name": "M4",       "capacity": 4, "x": 0.65, "y": 0.15, "status": "free" },
+  { "id": "m05", "name": "M5",       "capacity": 6, "x": 0.85, "y": 0.15, "status": "free" },
+  { "id": "m06", "name": "M6",       "capacity": 4, "x": 0.10, "y": 0.45, "status": "free" },
+  { "id": "m07", "name": "M7",       "capacity": 4, "x": 0.30, "y": 0.45, "status": "free" },
+  { "id": "m08", "name": "M8",       "capacity": 8, "x": 0.55, "y": 0.45, "status": "free" },
+  { "id": "m09", "name": "M9",       "capacity": 2, "x": 0.80, "y": 0.45, "status": "free" },
+  { "id": "t01", "name": "Terraza 1","capacity": 4, "x": 0.15, "y": 0.80, "status": "free" },
+  { "id": "t02", "name": "Terraza 2","capacity": 4, "x": 0.40, "y": 0.80, "status": "free" },
+  { "id": "t03", "name": "Terraza 3","capacity": 6, "x": 0.70, "y": 0.80, "status": "free" }
+]
