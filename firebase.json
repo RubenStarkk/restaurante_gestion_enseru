@@ -1,1 +1,20 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"restaurante-gestion-enseru","configurations":{"web":"1:34248937430:web:24406ba799a9de424f5e77"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "restaurante-gestion-enseru",
+          "configurations": {
+            "web": "1:34248937430:web:24406ba799a9de424f5e77"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "europe-southwest1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

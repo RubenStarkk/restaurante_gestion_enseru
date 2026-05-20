@@ -1,0 +1,116 @@
+[
+  {
+    "id": "ent01", "name": "Ensalada de la Casa",
+    "description": "Lechugas variadas, tomate, atún, huevo, aceitunas y picos.",
+    "category": "Entrantes", "price": 8.50,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  },
+  {
+    "id": "ent02", "name": "Croquetas Caseras de Jamón (6 ud.)",
+    "description": "Receta tradicional, masa cremosa.",
+    "category": "Entrantes", "price": 9.00,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  },
+  {
+    "id": "ent03", "name": "Burrata con Tomate Cherry y Pesto",
+    "description": "Burrata fresca y reducción de balsámico.",
+    "category": "Entrantes", "price": 11.50,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": true
+  },
+
+  {
+    "id": "tap01", "name": "Tapa de la Semana",
+    "description": "Pregunta a tu camarero.",
+    "category": "Tapas", "price": 3.50,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": true
+  },
+  {
+    "id": "tap02", "name": "Pulpo a la Brasa",
+    "description": "Sobre puré rústico de patata y pimentón de la Vera.",
+    "category": "Tapas", "price": 14.00,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  },
+
+  {
+    "id": "arr01", "name": "Arroz de Bogavante",
+    "description": "Mínimo 2 personas. Reserva con 24 h de antelación.",
+    "category": "Arroces", "price": 22.00,
+    "pricingType": "per_person", "byOrder": true, "newArrival": false
+  },
+  {
+    "id": "arr02", "name": "Arroz Negro con Calamar",
+    "description": "Mínimo 2 personas. Reserva con 24 h de antelación.",
+    "category": "Arroces", "price": 18.00,
+    "pricingType": "per_person", "byOrder": true, "newArrival": false
+  },
+  {
+    "id": "arr03", "name": "Paella Valenciana",
+    "description": "Pollo, conejo, judía verde y garrofó. Mínimo 2 personas.",
+    "category": "Arroces", "price": 16.00,
+    "pricingType": "per_person", "byOrder": true, "newArrival": false
+  },
+
+  {
+    "id": "car01", "name": "Solomillo de Ternera al Roquefort",
+    "description": "Servido con patatas panadera.",
+    "category": "Carnes", "price": 19.50,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  },
+  {
+    "id": "car02", "name": "Cordero Lechal Asado al Horno",
+    "description": "Pieza para 2-3 personas. Reserva con 24 h de antelación.",
+    "category": "Carnes", "price": 24.00,
+    "pricingType": "per_person", "byOrder": true, "newArrival": false
+  },
+  {
+    "id": "car03", "name": "Chuletón de Vaca Madurada",
+    "description": "A la parrilla, con sal en escamas.",
+    "category": "Carnes", "price": 28.00,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  },
+
+  {
+    "id": "pes01", "name": "Lubina a la Espalda",
+    "description": "Con verduras de temporada salteadas.",
+    "category": "Pescados", "price": 18.00,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  },
+  {
+    "id": "pes02", "name": "Bacalao Confitado con Pisto",
+    "description": "Lomo grueso, cocinado a baja temperatura.",
+    "category": "Pescados", "price": 17.00,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  },
+
+  {
+    "id": "pos01", "name": "Tarta de Queso Horneada",
+    "description": "Receta casera, textura cremosa.",
+    "category": "Postres", "price": 5.50,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  },
+  {
+    "id": "pos02", "name": "Coulant de Chocolate",
+    "description": "Con helado de vainilla.",
+    "category": "Postres", "price": 5.80,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  },
+  {
+    "id": "pos03", "name": "Torrija Caramelizada (Temporada)",
+    "description": "Con helado de canela.",
+    "category": "Postres", "price": 5.50,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": true
+  },
+
+  {
+    "id": "beb01", "name": "Vino de la Casa (copa)",
+    "description": "Tinto o blanco.",
+    "category": "Bebidas", "price": 2.50,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  },
+  {
+    "id": "beb02", "name": "Refresco / Agua",
+    "description": "",
+    "category": "Bebidas", "price": 2.00,
+    "pricingType": "per_unit", "byOrder": false, "newArrival": false
+  }
+]

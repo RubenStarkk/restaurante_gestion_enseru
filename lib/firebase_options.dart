@@ -60,4 +60,5 @@ class DefaultFirebaseOptions {
     authDomain: 'restaurante-gestion-enseru.firebaseapp.com',
     storageBucket: 'restaurante-gestion-enseru.firebasestorage.app',
   );
+
 }
