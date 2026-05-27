@@ -6,6 +6,8 @@ import 'screens/public/reservation_step2_screen.dart';
 import 'screens/public/reservation_step3_screen.dart';
 import 'screens/staff/login_screen.dart';
 import 'screens/staff/dashboard_screen.dart';
+import 'screens/staff/table_detail_screen.dart';
+import 'screens/staff/order_screen.dart';
 import 'widgets/auth_gate.dart';
 
 /// Raíz de la app. Define tema y rutas con nombres.
@@ -48,22 +50,12 @@ class EnseruApp extends StatelessWidget {
         AppRoutes.staffLogin: (_) => const LoginScreen(),
         AppRoutes.staffDashboard: (_) =>
         const AuthGate(child: DashboardScreen()),
+        AppRoutes.staffTableDetail: (_) =>
+        const AuthGate(child: TableDetailScreen()),
+        AppRoutes.staffOrder: (_) =>
+        const AuthGate(child: OrderScreen()),
 
-        // Las siguientes son del Sprint 2 (Sergio + Kike).
-        AppRoutes.staffTableDetail: (_) => const AuthGate(
-          child: _Placeholder(
-            who: 'Sergio',
-            title: 'Detalle de Mesa',
-            file: 'lib/screens/staff/table_detail_screen.dart',
-          ),
-        ),
-        AppRoutes.staffOrder: (_) => const AuthGate(
-          child: _Placeholder(
-            who: 'Sergio',
-            title: 'Comanda',
-            file: 'lib/screens/staff/order_screen.dart',
-          ),
-        ),
+        // Sprint 2 de Kike — vista de cocina (sigue pendiente).
         AppRoutes.staffKitchen: (_) => const AuthGate(
           child: _Placeholder(
             who: 'Kike',

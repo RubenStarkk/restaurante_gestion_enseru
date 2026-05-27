@@ -55,18 +55,18 @@ class PreorderedItem {
   });
 
   factory PreorderedItem.fromMap(Map<String, dynamic> m) => PreorderedItem(
-        menuItemId: m['menuItemId'] as String? ?? '',
-        name: m['name'] as String? ?? '',
-        qty: (m['qty'] as num?)?.toInt() ?? 1,
-        unitPrice: (m['unitPrice'] as num?)?.toDouble() ?? 0,
-      );
+    menuItemId: m['menuItemId'] as String? ?? '',
+    name: m['name'] as String? ?? '',
+    qty: (m['qty'] as num?)?.toInt() ?? 1,
+    unitPrice: (m['unitPrice'] as num?)?.toDouble() ?? 0,
+  );
 
   Map<String, dynamic> toMap() => {
-        'menuItemId': menuItemId,
-        'name': name,
-        'qty': qty,
-        'unitPrice': unitPrice,
-      };
+    'menuItemId': menuItemId,
+    'name': name,
+    'qty': qty,
+    'unitPrice': unitPrice,
+  };
 }
 
 class ReservationModel {
@@ -122,20 +122,35 @@ class ReservationModel {
           .toList(),
       status: _parseResStatus(d['status'] as String?),
       createdAt:
-          (d['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      (d['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 
   Map<String, dynamic> toMap() => {
-        'date': Timestamp.fromDate(date),
-        'shift': shiftToString(shift),
-        'guests': guests,
-        'tableIds': tableIds,
-        'customerName': customerName,
-        'customerPhone': customerPhone,
-        if (customerEmail != null) 'customerEmail': customerEmail,
-        'preorderedItems': preorderedItems.map((p) => p.toMap()).toList(),
-        'status': reservationStatusToString(status),
-        'createdAt': Timestamp.fromDate(createdAt),
-      };
+    'date': Timestamp.fromDate(date),
+    'shift': shiftToString(shift),
+    'guests': guests,
+    'tableIds': tableIds,
+    'customerName': customerName,
+    'customerPhone': customerPhone,
+    if (customerEmail != null) 'customerEmail': customerEmail,
+    'preorderedItems': preorderedItems.map((p) => p.toMap()).toList(),
+    'status': reservationStatusToString(status),
+    'createdAt': Timestamp.fromDate(createdAt),
+  };
+}
+
+/// Oculta parcialmente un teléfono para mostrarlo a usuarios con
+/// rol "waiter" (RNF3 — Privacidad).
+///
+/// Muestra los primeros 3 dígitos y los últimos 2; el resto como
+/// asteriscos. Ej: "600123456" → "600****56".
+/// Si el teléfono es muy corto, oculta todo.
+String maskPhone(String phone) {
+  final clean = phone.replaceAll(RegExp(r'\s+'), '');
+  if (clean.length < 6) return '****';
+  final start = clean.substring(0, 3);
+  final end = clean.substring(clean.length - 2);
+  final masked = '*' * (clean.length - 5);
+  return '$start$masked$end';
 }
