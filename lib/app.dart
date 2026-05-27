@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'screens/public/reservation_step1_screen.dart';
 import 'screens/public/reservation_step2_screen.dart';
 import 'screens/public/reservation_step3_screen.dart';
+import 'screens/staff/login_screen.dart';
+import 'screens/staff/dashboard_screen.dart';
+import 'widgets/auth_gate.dart';
 
 /// Raíz de la app. Define tema y rutas con nombres.
-/// Cada pantalla real se irá enchufando a su ruta correspondiente a medida
-/// que Sergio / Kike / Rubén las vayan creando. Mientras tanto, cada ruta
-/// muestra un placeholder con el nombre del responsable.
+/// Las rutas /staff/* están envueltas en AuthGate, así si no hay sesión
+/// el usuario va a /staff/login automáticamente.
 class EnseruApp extends StatelessWidget {
   const EnseruApp({super.key});
 
@@ -26,47 +29,48 @@ class EnseruApp extends StatelessWidget {
       theme: _buildTheme(),
       initialRoute: AppRoutes.home,
       routes: {
-        // Parte pública
+        // ── Parte pública ───────────────────────────────────────
         AppRoutes.home: (_) => const _Placeholder(
-              who: 'Kike',
-              title: 'Home / Landing',
-              file: 'lib/screens/public/home_screen.dart',
-            ),
+          who: 'Kike',
+          title: 'Home / Landing',
+          file: 'lib/screens/public/home_screen.dart',
+        ),
         AppRoutes.menu: (_) => const _Placeholder(
-              who: 'Kike',
-              title: 'Carta Digital',
-              file: 'lib/screens/public/menu_screen.dart',
-            ),
+          who: 'Kike',
+          title: 'Carta Digital',
+          file: 'lib/screens/public/menu_screen.dart',
+        ),
         AppRoutes.reservationStep1: (_) => const ReservationStep1Screen(),
         AppRoutes.reservationStep2: (_) => const ReservationStep2Screen(),
         AppRoutes.reservationStep3: (_) => const ReservationStep3Screen(),
 
-        // Parte staff
-        AppRoutes.staffLogin: (_) => const _Placeholder(
-              who: 'Sergio',
-              title: 'Login Staff',
-              file: 'lib/screens/staff/login_screen.dart',
-            ),
-        AppRoutes.staffDashboard: (_) => const _Placeholder(
-              who: 'Sergio',
-              title: 'Dashboard (Mapa en Vivo)',
-              file: 'lib/screens/staff/dashboard_screen.dart',
-            ),
-        AppRoutes.staffTableDetail: (_) => const _Placeholder(
-              who: 'Sergio',
-              title: 'Detalle de Mesa',
-              file: 'lib/screens/staff/table_detail_screen.dart',
-            ),
-        AppRoutes.staffOrder: (_) => const _Placeholder(
-              who: 'Sergio',
-              title: 'Comanda',
-              file: 'lib/screens/staff/order_screen.dart',
-            ),
-        AppRoutes.staffKitchen: (_) => const _Placeholder(
-              who: 'Kike',
-              title: 'Vista de Cocina',
-              file: 'lib/screens/staff/kitchen_screen.dart',
-            ),
+        // ── Parte staff (protegida con AuthGate) ────────────────
+        AppRoutes.staffLogin: (_) => const LoginScreen(),
+        AppRoutes.staffDashboard: (_) =>
+        const AuthGate(child: DashboardScreen()),
+
+        // Las siguientes son del Sprint 2 (Sergio + Kike).
+        AppRoutes.staffTableDetail: (_) => const AuthGate(
+          child: _Placeholder(
+            who: 'Sergio',
+            title: 'Detalle de Mesa',
+            file: 'lib/screens/staff/table_detail_screen.dart',
+          ),
+        ),
+        AppRoutes.staffOrder: (_) => const AuthGate(
+          child: _Placeholder(
+            who: 'Sergio',
+            title: 'Comanda',
+            file: 'lib/screens/staff/order_screen.dart',
+          ),
+        ),
+        AppRoutes.staffKitchen: (_) => const AuthGate(
+          child: _Placeholder(
+            who: 'Kike',
+            title: 'Vista de Cocina',
+            file: 'lib/screens/staff/kitchen_screen.dart',
+          ),
+        ),
       },
     );
   }
@@ -100,8 +104,7 @@ class AppRoutes {
   static const staffKitchen = '/staff/cocina';
 }
 
-/// Placeholder temporal. Cada uno borra el suyo cuando crea la pantalla real
-/// y la engancha en `routes` arriba.
+/// Placeholder temporal para pantallas que aún no existen.
 class _Placeholder extends StatelessWidget {
   final String who;
   final String title;
