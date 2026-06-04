@@ -157,7 +157,6 @@ class OrdersService {
 
   /// Cambia el estado de cocina de una línea
   /// (pending → preparing → ready → served).
-  /// Lo usará la KitchenScreen de Kike en su Sprint 2.
   Future<void> updateKitchenStatus({
     required String orderId,
     required String itemId,
@@ -165,6 +164,46 @@ class OrdersService {
   }) async {
     await _itemsOf(orderId).doc(itemId).update({
       'kitchenStatus': kitchenStatusToString(status),
+    });
+  }
+
+  // ──────────────────────────────────────────────────────────
+  //  Vista de cocina — añadido por Kike (Sprint 2)
+  // ──────────────────────────────────────────────────────────
+
+  /// Stream de todos los items con estado pending o preparing de todas
+  /// las comandas abiertas. Lo usa exclusivamente KitchenScreen.
+  ///
+  /// Implementación en dos pasos para evitar queries collectionGroup
+  /// (que requeriría un índice global adicional):
+  ///   1. Escucha las comandas con status == 'open'.
+  ///   2. Por cada comanda, consulta sus items activos.
+  Stream<List<KitchenItem>> watchKitchenItems() {
+    return _orders
+        .where('status', isEqualTo: 'open')
+        .snapshots()
+        .asyncMap((ordersSnap) async {
+      if (ordersSnap.docs.isEmpty) return <KitchenItem>[];
+
+      final result = <KitchenItem>[];
+      for (final orderDoc in ordersSnap.docs) {
+        final tableId =
+            (orderDoc.data())['tableId'] as String? ?? '';
+
+        final itemsSnap = await _itemsOf(orderDoc.id)
+            .where('kitchenStatus', whereIn: ['pending', 'preparing'])
+            .orderBy('createdAt')
+            .get();
+
+        for (final itemDoc in itemsSnap.docs) {
+          result.add(KitchenItem(
+            orderId: orderDoc.id,
+            tableId: tableId,
+            item: OrderItem.fromDoc(itemDoc),
+          ));
+        }
+      }
+      return result;
     });
   }
 
@@ -177,4 +216,22 @@ class OrdersService {
   double totalOf(List<OrderItem> items) {
     return items.fold(0, (sum, it) => sum + it.lineTotal);
   }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+//  DTO de cocina — añadido por Kike (Sprint 2)
+// ──────────────────────────────────────────────────────────────────────────────
+
+/// Agrupa un OrderItem con el contexto de su comanda y mesa.
+/// Solo lo usa KitchenScreen — no es un modelo de Firestore.
+class KitchenItem {
+  const KitchenItem({
+    required this.orderId,
+    required this.tableId,
+    required this.item,
+  });
+
+  final String orderId;
+  final String tableId;
+  final OrderItem item;
 }

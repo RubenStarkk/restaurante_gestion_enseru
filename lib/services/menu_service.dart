@@ -34,4 +34,31 @@ class MenuService {
           (snap) => snap.docs.map(MenuItemModel.fromDoc).toList(),
     );
   }
+
+  // ── Añadido por Kike (Sprint 1) ──────────────────────────────────────────
+
+  /// Stream con solo los platos marcados como novedad.
+  /// Para la sección "Novedades de temporada" de la landing.
+  Stream<List<MenuItemModel>> watchNewArrivals({int limit = 3}) {
+    return _col
+        .where('newArrival', isEqualTo: true)
+        .limit(limit)
+        .snapshots()
+        .map(
+          (snap) => snap.docs.map(MenuItemModel.fromDoc).toList(),
+    );
+  }
+
+  /// Agrupa una lista plana por categoría (String), manteniendo el
+  /// orden en que Firestore los devuelve (ya ordenados por 'category').
+  /// Usado por MenuScreen para pintar las secciones de la carta.
+  static Map<String, List<MenuItemModel>> groupByCategory(
+      List<MenuItemModel> items,
+      ) {
+    final map = <String, List<MenuItemModel>>{};
+    for (final item in items) {
+      map.putIfAbsent(item.category, () => []).add(item);
+    }
+    return map;
+  }
 }
