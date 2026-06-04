@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'screens/public/landing_screen.dart';
+import 'screens/public/menu_screen.dart';
 import 'screens/public/reservation_step1_screen.dart';
 import 'screens/public/reservation_step2_screen.dart';
 import 'screens/public/reservation_step3_screen.dart';
@@ -8,6 +10,7 @@ import 'screens/staff/login_screen.dart';
 import 'screens/staff/dashboard_screen.dart';
 import 'screens/staff/table_detail_screen.dart';
 import 'screens/staff/order_screen.dart';
+import 'screens/staff/kitchen_screen.dart';
 import 'widgets/auth_gate.dart';
 
 /// Raíz de la app. Define tema y rutas con nombres.
@@ -31,38 +34,19 @@ class EnseruApp extends StatelessWidget {
       theme: _buildTheme(),
       initialRoute: AppRoutes.home,
       routes: {
-        // ── Parte pública ───────────────────────────────────────
-        AppRoutes.home: (_) => const _Placeholder(
-          who: 'Kike',
-          title: 'Home / Landing',
-          file: 'lib/screens/public/home_screen.dart',
-        ),
-        AppRoutes.menu: (_) => const _Placeholder(
-          who: 'Kike',
-          title: 'Carta Digital',
-          file: 'lib/screens/public/menu_screen.dart',
-        ),
+        // ── Parte pública ──────────────────────────────────────────────────
+        AppRoutes.home:             (_) => const LandingScreen(),
+        AppRoutes.menu:             (_) => const MenuScreen(),
         AppRoutes.reservationStep1: (_) => const ReservationStep1Screen(),
         AppRoutes.reservationStep2: (_) => const ReservationStep2Screen(),
         AppRoutes.reservationStep3: (_) => const ReservationStep3Screen(),
 
-        // ── Parte staff (protegida con AuthGate) ────────────────
-        AppRoutes.staffLogin: (_) => const LoginScreen(),
-        AppRoutes.staffDashboard: (_) =>
-        const AuthGate(child: DashboardScreen()),
-        AppRoutes.staffTableDetail: (_) =>
-        const AuthGate(child: TableDetailScreen()),
-        AppRoutes.staffOrder: (_) =>
-        const AuthGate(child: OrderScreen()),
-
-        // Sprint 2 de Kike — vista de cocina (sigue pendiente).
-        AppRoutes.staffKitchen: (_) => const AuthGate(
-          child: _Placeholder(
-            who: 'Kike',
-            title: 'Vista de Cocina',
-            file: 'lib/screens/staff/kitchen_screen.dart',
-          ),
-        ),
+        // ── Parte staff (protegida con AuthGate) ───────────────────────────
+        AppRoutes.staffLogin:     (_) => const LoginScreen(),
+        AppRoutes.staffDashboard: (_) => const AuthGate(child: DashboardScreen()),
+        AppRoutes.staffTableDetail:(_) => const AuthGate(child: TableDetailScreen()),
+        AppRoutes.staffOrder:     (_) => const AuthGate(child: OrderScreen()),
+        AppRoutes.staffKitchen:   (_) => const AuthGate(child: KitchenScreen()),
       },
     );
   }
@@ -82,56 +66,16 @@ class EnseruApp extends StatelessWidget {
 /// Rutas centralizadas para evitar strings sueltos por todo el código.
 class AppRoutes {
   // Público
-  static const home = '/';
-  static const menu = '/menu';
+  static const home             = '/';
+  static const menu             = '/menu';
   static const reservationStep1 = '/reservar';
   static const reservationStep2 = '/reservar/mesas';
   static const reservationStep3 = '/reservar/datos';
 
   // Staff
-  static const staffLogin = '/staff/login';
-  static const staffDashboard = '/staff';
+  static const staffLogin       = '/staff/login';
+  static const staffDashboard   = '/staff';
   static const staffTableDetail = '/staff/mesa';
-  static const staffOrder = '/staff/comanda';
-  static const staffKitchen = '/staff/cocina';
-}
-
-/// Placeholder temporal para pantallas que aún no existen.
-class _Placeholder extends StatelessWidget {
-  final String who;
-  final String title;
-  final String file;
-  const _Placeholder({
-    required this.who,
-    required this.title,
-    required this.file,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.construction, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text('Pendiente · responsable: $who'),
-              const SizedBox(height: 8),
-              Text(file, style: Theme.of(context).textTheme.bodySmall),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  static const staffOrder       = '/staff/comanda';
+  static const staffKitchen     = '/staff/cocina';
 }
