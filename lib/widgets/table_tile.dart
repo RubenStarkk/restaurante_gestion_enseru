@@ -19,6 +19,14 @@ class TableTile extends StatelessWidget {
   /// Para el staff: nunca (siempre puede entrar al detalle).
   final bool disabled;
 
+  /// (Sprint 2 Rubén) Indica si esta mesa tiene una reserva activa
+  /// para el turno actual. Cuando es `true` y el estado real es `free`,
+  /// el tile se pinta como "Reservada (próximamente)" — color ámbar y
+  /// pequeño candado — sin tocar el campo `status` de Firestore.
+  /// Se usa en el Dashboard del staff para que el camarero vea de un
+  /// vistazo qué mesas tienen reserva sin entrar al detalle.
+  final bool hasActiveReservation;
+
   final VoidCallback? onTap;
 
   const TableTile({
@@ -26,13 +34,30 @@ class TableTile extends StatelessWidget {
     required this.table,
     this.selected = false,
     this.disabled = false,
+    this.hasActiveReservation = false,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final (bg, fg, icon, label) = _styleFor(table.status, scheme);
+
+    // Si hay reserva activa pero el estado real sigue siendo libre,
+    // pintamos como si fuera "reserved" (mismo ámbar). El status real
+    // no se toca, sólo la representación visual.
+    final effectiveStatus =
+    (hasActiveReservation && table.status == TableStatus.free)
+        ? TableStatus.reserved
+        : table.status;
+
+    final (bg, fg, icon, label) = _styleFor(effectiveStatus, scheme);
+
+    // Etiqueta más explícita cuando el ámbar viene de una reserva,
+    // para distinguirlo del ámbar de "status manual = reserved".
+    final shownLabel =
+    (hasActiveReservation && table.status == TableStatus.free)
+        ? 'Reservada hoy'
+        : label;
 
     return Opacity(
       opacity: disabled ? 0.55 : 1,
@@ -70,7 +95,7 @@ class TableTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  label,
+                  shownLabel,
                   style: TextStyle(color: fg, fontSize: 11),
                 ),
               ],

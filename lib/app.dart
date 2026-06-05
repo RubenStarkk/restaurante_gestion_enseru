@@ -11,6 +11,7 @@ import 'screens/staff/dashboard_screen.dart';
 import 'screens/staff/table_detail_screen.dart';
 import 'screens/staff/order_screen.dart';
 import 'screens/staff/kitchen_screen.dart';
+import 'screens/staff/reservations_today_screen.dart';
 import 'widgets/auth_gate.dart';
 
 /// Raíz de la app. Define tema y rutas con nombres.
@@ -42,11 +43,12 @@ class EnseruApp extends StatelessWidget {
         AppRoutes.reservationStep3: (_) => const ReservationStep3Screen(),
 
         // ── Parte staff (protegida con AuthGate) ───────────────────────────
-        AppRoutes.staffLogin:     (_) => const LoginScreen(),
-        AppRoutes.staffDashboard: (_) => const AuthGate(child: DashboardScreen()),
-        AppRoutes.staffTableDetail:(_) => const AuthGate(child: TableDetailScreen()),
-        AppRoutes.staffOrder:     (_) => const AuthGate(child: OrderScreen()),
-        AppRoutes.staffKitchen:   (_) => const AuthGate(child: KitchenScreen()),
+        AppRoutes.staffLogin:        (_) => const LoginScreen(),
+        AppRoutes.staffDashboard:    (_) => const AuthGate(child: DashboardScreen()),
+        AppRoutes.staffTableDetail:  (_) => const AuthGate(child: TableDetailScreen()),
+        AppRoutes.staffOrder:        (_) => const AuthGate(child: OrderScreen()),
+        AppRoutes.staffKitchen:      (_) => const AuthGate(child: KitchenScreen()),
+        AppRoutes.staffReservations: (_) => const AuthGate(child: ReservationsTodayScreen()),
       },
     );
   }
@@ -73,9 +75,10 @@ class AppRoutes {
   static const reservationStep3 = '/reservar/datos';
 
   // Staff
-  static const staffLogin       = '/staff/login';
-  static const staffDashboard   = '/staff';
-  static const staffTableDetail = '/staff/mesa';
-  static const staffOrder       = '/staff/comanda';
-  static const staffKitchen     = '/staff/cocina';
+  static const staffLogin        = '/staff/login';
+  static const staffDashboard    = '/staff';
+  static const staffTableDetail  = '/staff/mesa';
+  static const staffOrder        = '/staff/comanda';
+  static const staffKitchen      = '/staff/cocina';
+  static const staffReservations = '/staff/reservas';
 }
