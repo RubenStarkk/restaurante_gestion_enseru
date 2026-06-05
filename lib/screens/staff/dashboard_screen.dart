@@ -1,30 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../app.dart';
+import '../../models/reservation_model.dart';
 import '../../models/table_model.dart';
 import '../../services/auth_service.dart';
+import '../../services/reservations_service.dart';
 import '../../services/tables_service.dart';
 import '../../widgets/table_tile.dart';
 
+
 /// Dashboard del staff — el "Mapa en Vivo" del local.
 ///
-/// Muestra todas las mesas con su estado actual usando StreamBuilder:
-/// si un camarero ocupa una mesa o el admin la bloquea, se ve aquí en
-/// tiempo real sin recargar.
+/// Combina dos streams en tiempo real:
+///   - TablesService.watchAll() → estado físico de cada mesa.
+///   - ReservationsService.watchActiveForToday() → reservas del día.
 ///
-/// Reutiliza:
-///   - `TablesService.watchAll()` (Rubén)
-///   - `TableTile` (Rubén)
-///
-/// Al pulsar una mesa, navega al TableDetailScreen (placeholder por
-/// ahora, Sprint 2 lo implementa).
+/// Una mesa cuyo `status` es `free` pero que tiene reserva activa hoy
+/// se pinta en ámbar como "Reservada hoy". Eso permite al camarero ver
+/// de un vistazo qué mesas no deberían ocuparse sin más sin tocar el
+/// estado real (la mesa sigue libre hasta que físicamente alguien la
+/// ocupa). Sprint 2 Rubén.
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final tablesService = TablesService();
+    final reservationsService = ReservationsService();
     final authService = AuthService();
     final user = authService.currentUser;
 
@@ -32,7 +34,13 @@ class DashboardScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Mapa en vivo'),
         actions: [
-          // Email del usuario logueado, para que se sepa quién está.
+          // Acceso rápido a la pantalla "Reservas del día" (Sprint 2 Rubén).
+          IconButton(
+            tooltip: 'Reservas de hoy',
+            icon: const Icon(Icons.event_note),
+            onPressed: () => Navigator.of(context)
+                .pushNamed(AppRoutes.staffReservations),
+          ),
           if (user != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -52,30 +60,48 @@ class DashboardScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Leyenda de colores para que cualquiera entienda el mapa
-          // de un vistazo.
           const _Legend(),
           const Divider(height: 1),
           Expanded(
+            // Stream "interno" combinado: cada vez que cambien mesas
+            // O reservas, el grid se repinta con los datos cruzados.
             child: StreamBuilder<List<TableModel>>(
               stream: tablesService.watchAll(),
-              builder: (context, snap) {
-                if (snap.hasError) {
-                  return _ErrorBox(error: snap.error!);
+              builder: (context, tablesSnap) {
+                if (tablesSnap.hasError) {
+                  return _ErrorBox(error: tablesSnap.error!);
                 }
-                if (!snap.hasData) {
+                if (!tablesSnap.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                final tables = snap.data!;
+                final tables = tablesSnap.data!;
                 if (tables.isEmpty) {
                   return const _EmptyBox();
                 }
-                return _TableGrid(
-                  tables: tables,
-                  onTap: (table) {
-                    Navigator.of(context).pushNamed(
-                      AppRoutes.staffTableDetail,
-                      arguments: table,
+                return StreamBuilder<List<ReservationModel>>(
+                  stream: reservationsService.watchActiveForToday(),
+                  builder: (context, reservationsSnap) {
+                    // Si las reservas no han llegado todavía (o fallan)
+                    // pintamos el grid sin overlay — no bloqueamos la
+                    // app por una capa secundaria de info.
+                    final activeReservations =
+                        reservationsSnap.data ?? const <ReservationModel>[];
+
+                    // Pre-calculamos un set con todos los tableIds que
+                    // están reservados hoy. O(1) por mesa al pintar.
+                    final reservedTableIds = <String>{
+                      for (final r in activeReservations) ...r.tableIds,
+                    };
+
+                    return _TableGrid(
+                      tables: tables,
+                      reservedTableIds: reservedTableIds,
+                      onTap: (table) {
+                        Navigator.of(context).pushNamed(
+                          AppRoutes.staffTableDetail,
+                          arguments: table,
+                        );
+                      },
                     );
                   },
                 );
@@ -108,9 +134,6 @@ class DashboardScreen extends StatelessWidget {
     );
     if (confirm != true) return;
     await authService.signOut();
-    // Tras signOut, el AuthGate detecta el cambio y nos manda al login
-    // automáticamente. Pero como esta pantalla está YA pintada, hacemos
-    // un push explícito por si acaso.
     if (!context.mounted) return;
     Navigator.of(context).pushReplacementNamed(AppRoutes.staffLogin);
   }
@@ -132,7 +155,7 @@ class _Legend extends StatelessWidget {
         runSpacing: 4,
         children: const [
           _LegendDot(color: Colors.green, label: 'Libre'),
-          _LegendDot(color: Colors.amber, label: 'Reservada'),
+          _LegendDot(color: Colors.amber, label: 'Reservada hoy'),
           _LegendDot(color: Colors.red, label: 'Ocupada'),
           _LegendDot(color: Colors.grey, label: 'Bloqueada'),
         ],
@@ -168,15 +191,20 @@ class _LegendDot extends StatelessWidget {
 
 class _TableGrid extends StatelessWidget {
   final List<TableModel> tables;
+  final Set<String> reservedTableIds;
   final ValueChanged<TableModel> onTap;
 
-  const _TableGrid({required this.tables, required this.onTap});
+  const _TableGrid({
+    required this.tables,
+    required this.reservedTableIds,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Responsive: 2 columnas en móvil, 4 en tablet, 6 en escritorio.
+        // Responsive: 2 cols en móvil, 4 en tablet, 6 en escritorio.
         final cols = constraints.maxWidth < 480
             ? 2
             : constraints.maxWidth < 900
@@ -191,10 +219,14 @@ class _TableGrid extends StatelessWidget {
             childAspectRatio: 0.95,
           ),
           itemCount: tables.length,
-          itemBuilder: (_, i) => TableTile(
-            table: tables[i],
-            onTap: () => onTap(tables[i]),
-          ),
+          itemBuilder: (_, i) {
+            final t = tables[i];
+            return TableTile(
+              table: t,
+              hasActiveReservation: reservedTableIds.contains(t.id),
+              onTap: () => onTap(t),
+            );
+          },
         );
       },
     );

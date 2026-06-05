@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../app.dart';
 import '../../models/order_model.dart';
@@ -8,6 +7,7 @@ import '../../models/reservation_model.dart';
 import '../../models/table_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/orders_service.dart';
+import '../../services/reservations_service.dart';
 import '../../services/tables_service.dart';
 
 /// Detalle de una mesa para el staff.
@@ -17,7 +17,7 @@ import '../../services/tables_service.dart';
 ///   - Reserva activa para hoy si existe (con teléfono ofuscado si
 ///     el usuario es waiter — cumple RNF3)
 ///   - Acciones del staff: ocupar manualmente, liberar, bloquear/
-///     desbloquear (solo admin)
+///     desbloquear, cancelar reserva (solo admin)
 ///   - Botón "Abrir / ver comanda" que lleva a OrderScreen
 class TableDetailScreen extends StatefulWidget {
   const TableDetailScreen({super.key});
@@ -241,13 +241,23 @@ class _ReservationSection extends StatelessWidget {
   }
 }
 
-class _ReservationCard extends StatelessWidget {
+class _ReservationCard extends StatefulWidget {
   final ReservationModel reservation;
   final StaffRole? role;
   const _ReservationCard({required this.reservation, required this.role});
 
   @override
+  State<_ReservationCard> createState() => _ReservationCardState();
+}
+
+class _ReservationCardState extends State<_ReservationCard> {
+  final _reservationsService = ReservationsService();
+  bool _cancelling = false;
+
+  @override
   Widget build(BuildContext context) {
+    final reservation = widget.reservation;
+    final role = widget.role;
     final isAdmin = role == StaffRole.admin;
     final phoneDisplay = isAdmin
         ? reservation.customerPhone
@@ -285,7 +295,8 @@ class _ReservationCard extends StatelessWidget {
                     size: 16, color: Colors.grey),
               ),
             ),
-            if (isAdmin && (reservation.customerEmail?.isNotEmpty ?? false))
+            if (isAdmin &&
+                (reservation.customerEmail?.isNotEmpty ?? false))
               _Row(
                 icon: Icons.email_outlined,
                 label: reservation.customerEmail!,
@@ -306,10 +317,76 @@ class _ReservationCard extends StatelessWidget {
               for (final p in reservation.preorderedItems)
                 Text('· ${p.qty}× ${p.name}'),
             ],
+            // Botón de cancelación — solo admin.
+            if (isAdmin) ...[
+              const Divider(),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: _cancelling
+                      ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                      : const Icon(Icons.cancel_outlined),
+                  label: Text(_cancelling
+                      ? 'Cancelando…'
+                      : 'Cancelar reserva'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red.shade700,
+                  ),
+                  onPressed: _cancelling ? null : _confirmAndCancel,
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _confirmAndCancel() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Cancelar reserva'),
+        content: Text(
+          '¿Cancelar la reserva de ${widget.reservation.customerName}? '
+              'Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sí, cancelar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _cancelling = true);
+    try {
+      await _reservationsService.cancelReservation(widget.reservation.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reserva cancelada.')),
+      );
+      // No hace falta tocar _cancelling: el StreamBuilder de la sección
+      // padre detectará el cambio de status y dejará de pintar esta card.
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _cancelling = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al cancelar: $e')),
+      );
+    }
   }
 }
 
